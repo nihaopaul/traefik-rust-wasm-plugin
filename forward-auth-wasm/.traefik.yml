@@ -1,0 +1,14 @@
+displayName: forwardAuthPlugin
+type: middleware
+iconPath: .assets/icon.png
+
+summary: "[wasm] forward_auth"
+
+wasmPath: forward_auth.wasm
+
+runtime: wasm
+
+testData:
+  Headers:
+    X-Demo: test
+    X-URL: "{{URL}}"
