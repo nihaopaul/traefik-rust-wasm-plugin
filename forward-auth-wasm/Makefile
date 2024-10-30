@@ -22,7 +22,7 @@ clean:
 
 docker: 
 	make build
-	docker compose up | grep forward-auth
+	docker compose up 
 
 setup:
 	rustup target add wasm32-unknown-unknown
@@ -30,3 +30,7 @@ setup:
 
 http:
 	curl -sS -D - 127.0.0.1/foo -o /dev/null
+
+debug:
+	make build
+	wasm2wat pkg/traefik-auth.wasm | less
