@@ -1,15 +1,17 @@
-mod utils;
 
-use wasm_bindgen::prelude::*;
+use log::{info};
 
-// #[wasm_bindgen]
-// extern "C" {
-//     fn handle_request(s: &str);
-// }
 
-#[wasm_bindgen]
-pub fn handle_request() -> u64 {
-  std::process::exit(1);
-  // return 0 as u64;
+
+#[no_mangle]
+pub extern "C" fn handle_request() -> u64 {
+  info!("Reequest: ");
+  return 0 as u64;
 }
 
+
+#[no_mangle]
+pub extern "C" fn handle_response(high:i32, low: i32)  {
+  let res = (high as u64) << 32 | low as u64;
+  info!("Response: {res}");
+}

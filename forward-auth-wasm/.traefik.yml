@@ -9,6 +9,7 @@ wasmPath: forward_auth.wasm
 runtime: wasm
 
 testData:
-  Headers:
-    X-Demo: test
-    X-URL: "{{URL}}"
+  Config:
+    CF_TOKEN: "DEADBEEF"
+    CF_ORG: "ABCDEFG"
+    CF_DOMAIN: "https://{yourdomain}.cloudflareaccess.com"

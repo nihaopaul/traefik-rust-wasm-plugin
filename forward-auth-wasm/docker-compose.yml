@@ -8,15 +8,15 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
-      - "--experimental.localPlugins.forwardAuthPlugin.modulename=github.com/nihaopaul/forward-auth"
-      # - "--provider.plugin.forwardAuthPlugin.URL=true"
+      - "--experimental.localPlugins.forwardAuthPlugin.modulename=github.com/nihaopaul/traefik-rust-wasm-plugin"
+
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "${PWD}/pkg/traefik-auth.wasm:/plugins-local/src/github.com/nihaopaul/forward-auth/forward_auth.wasm:ro"
-      - "${PWD}/pkg/.traefik.yml:/plugins-local/src/github.com/nihaopaul/forward-auth/.traefik.yml:ro"
+      - "${PWD}/pkg/traefik-auth.wasm:/plugins-local/src/github.com/nihaopaul/traefik-rust-wasm-plugin/forward_auth.wasm:ro"
+      - "${PWD}/pkg/.traefik.yml:/plugins-local/src/github.com/nihaopaul/traefik-rust-wasm-plugin/.traefik.yml:ro"
 
   whoami:
     #  A container that exposes an API to show its IP address
@@ -25,4 +25,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.entrypoints=web"
       - "traefik.http.routers.whoami.rule=Path(`/foo`)"
-      - "traefik.http.routers.whoami.middlewares=forwardAuthPlugin@file"
+      - "traefik.http.routers.whoami.middlewares=auth-plugin"
+      - "traefik.http.middlewares.auth-plugin.plugin.forwardAuthPlugin.Config.CF_TOKEN=TOKEN"
+      - "traefik.http.middlewares.auth-plugin.plugin.forwardAuthPlugin.Config.CF_ORG=ORG"
+      - "traefik.http.middlewares.auth-plugin.plugin.forwardAuthPlugin.Config.CF_DOMAIN=DOMAIN"

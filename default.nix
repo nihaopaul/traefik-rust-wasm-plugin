@@ -7,12 +7,11 @@ let
   buildInputs = [
     pkgs.git
     pkgs.rustup
-    pkgs.nodejs-18_x
-    pkgs.cargo-generate
     pkgs.libiconv
     frameworks.Security
     frameworks.CoreFoundation
     frameworks.CoreServices
+    pkgs.wabt
   ];
 
 }
