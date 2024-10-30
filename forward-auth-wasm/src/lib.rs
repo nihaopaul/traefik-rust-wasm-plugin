@@ -12,9 +12,12 @@ const LOG_LEVEL_NONE: i32 = 3;
 
 // Function to log a message if the log level is enabled
 pub fn log_message(level: i32, message: &str) {
+
   if is_log_enabled(level) {
     unsafe {
-      log(level, message.as_ptr() as *const i32,  message.len() as i32);
+      let ptr = message.as_ptr() as *const i32; 
+      let len = message.len() as i32;
+      log(level, ptr,  len);
     }
   }
 }
