@@ -27,3 +27,6 @@ docker:
 setup:
 	rustup target add wasm32-unknown-unknown
 	cargo check --target wasm32-unknown-unknown --no-default-features
+
+http:
+	curl -sS -D - 127.0.0.1/foo -o /dev/null

@@ -12,6 +12,7 @@ let
     frameworks.CoreFoundation
     frameworks.CoreServices
     pkgs.wabt
+    pkgs.httpie
   ];
 
 }
