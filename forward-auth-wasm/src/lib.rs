@@ -1,6 +1,13 @@
 
-
 use serde_derive::Deserialize;
+use std::ffi::CString;
+
+
+extern "C" {
+  fn get_config(buf: i32, buf_limit: i32) -> i32;
+  fn log(level: i32,message: i32, len: i32);
+  fn log_enabled(level: i32) -> i32;
+}
 
 // Define log levels as constants
 const LOG_LEVEL_DEBUG: i32 = -1;
@@ -10,22 +17,22 @@ const LOG_LEVEL_ERROR: i32 = 2;
 const LOG_LEVEL_NONE: i32 = 3;
 //
 
-// Function to log a message if the log level is enabled
-pub fn log_message(level: i32, message: &str) {
 
-  if is_log_enabled(level) {
-    unsafe {
-      let ptr = message.as_ptr() as *const i32; 
-      let len = message.len() as i32;
-      log(level, ptr,  len);
-    }
+
+// Function to log a message if the log level is enabled
+#[no_mangle]
+pub fn log_message(level: i32, str: &str) {
+  let _str = CString::new(str).unwrap();
+  let bytes = _str.as_bytes();
+
+  let len = bytes.len() as i32;
+  unsafe {
+    let ptr = bytes.as_ptr() as i32;
+    log(level, ptr, len);
   }
 }
 
-// Function to check if logging is enabled for a given level
-pub fn is_log_enabled(level: i32) -> bool {
-    unsafe { log_enabled(level) != 0 }
-}
+
 
 // Function to call get_config and retrieve the configuration as a String
 pub fn retrieve_config() -> Option<String> {
@@ -47,11 +54,8 @@ pub fn retrieve_config() -> Option<String> {
     }
 }
 
-extern "C" {
-    fn get_config(buf: i32, buf_limit: i32) -> i32;
-    fn log(level: i32, message: *const i32, message_len: i32);
-    fn log_enabled(level: i32) -> i32;
-}
+
+
 
 #[repr(C)]
 #[derive(Deserialize)]
@@ -69,7 +73,10 @@ struct Response {
 }
 
 #[no_mangle]
-pub extern "C" fn handle_request() -> u64 {
+pub extern fn handle_request() -> i64 {
+  unsafe {
+    let config: i32=  log_enabled(LOG_LEVEL_DEBUG);
+  }
     // TODO: Implement logging, currently in trouble with i32 memory allocation
     // log_message(LOG_LEVEL_DEBUG, "DEADBEEF");
 
@@ -77,10 +84,20 @@ pub extern "C" fn handle_request() -> u64 {
     // directly and return 0 to skip the next handler.
 
     // For now, we proceed to the next handler with context
-    16<<32|1 as u64
+    16<<32|1
 }
 
 #[no_mangle]
-pub extern "C" fn handle_response(_req_ctx: i32, _is_error: i32) {
+pub extern fn handle_response(_req_ctx: i32, _is_error: i32) {
+  // log_message(LOG_LEVEL_DEBUG, "DEADBEEF");
+}
 
+pub fn main() {
+    // Retrieve the configuration
+    let config = retrieve_config();
+    if let Some(config_str) = config {
+        log_message(LOG_LEVEL_INFO, &format!("Configuration: {}", config_str));
+    } else {
+        log_message(LOG_LEVEL_ERROR, "Failed to retrieve configuration");
+    }
 }
