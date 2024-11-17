@@ -1,103 +1,46 @@
+use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+use std::str;
 
-use serde_derive::Deserialize;
-use std::ffi::CString;
+mod guest;
 
-
-extern "C" {
-  fn get_config(buf: i32, buf_limit: i32) -> i32;
-  fn log(level: i32,message: i32, len: i32);
-  fn log_enabled(level: i32) -> i32;
+// TODO: this function does not quite return the Config struct yet but the bytes of decimals do
+lazy_static! {
+    static ref CONFIG: Config = {
+        match serde_json::from_slice(&guest::get_conf()) {
+            Ok(config) => config,
+            Err(e) => {
+                guest::send_log(guest::WARN, format!("{:?}", e).as_str());
+                guest::send_log(guest::WARN, format!("{:?}", &guest::get_conf()).as_str());
+                Config {
+                    CF_DOMAIN: "NO_DOMAIN".to_string(),
+                    CF_ORG: "NO_ORG".to_string(),
+                    CF_TOKEN: "NO_TOKEN".to_string(),
+                }
+            }
+        }
+    };
 }
 
-// Define log levels as constants
-const LOG_LEVEL_DEBUG: i32 = -1;
-const LOG_LEVEL_INFO: i32 = 0;
-const LOG_LEVEL_WARN: i32 = 1;
-const LOG_LEVEL_ERROR: i32 = 2;
-const LOG_LEVEL_NONE: i32 = 3;
-//
+fn main() {}
 
-
-
-// Function to log a message if the log level is enabled
-#[no_mangle]
-pub fn log_message(level: i32, str: &str) {
-  let _str = CString::new(str).unwrap();
-  let bytes = _str.as_bytes();
-
-  let len = bytes.len() as i32;
-  unsafe {
-    let ptr = bytes.as_ptr() as i32;
-    log(level, ptr, len);
-  }
+#[derive(Debug, Serialize, Deserialize)]
+struct Config {
+    CF_DOMAIN: String,
+    CF_ORG: String,
+    CF_TOKEN: String,
 }
 
-
-
-// Function to call get_config and retrieve the configuration as a String
-pub fn retrieve_config() -> Option<String> {
-    // Allocate a buffer
-    let mut buffer = vec![0u8; 1024];
-    let buf_ptr = buffer.as_mut_ptr() as i32;
-    let buf_limit = buffer.len() as i32;
-
-    // Call the get_config function
-    let len = unsafe { get_config(buf_ptr, buf_limit) };
-
-    // Check if the length is valid
-    if len > 0 && (len as usize) <= buffer.len() {
-        // Convert the buffer to a String
-        let config_str = String::from_utf8_lossy(&buffer[..len as usize]).to_string();
-        Some(config_str)
-    } else {
-        None
-    }
+#[export_name = "handle_request"]
+pub fn http_request() -> i64 {
+    let conf: &Config = &*CONFIG;
+    // for (k, v) in &conf.headers {
+    //     guest::add_header(guest::REQUEST_HEADER, &k, &v);
+    // }
+    // guest::send_log(guest::DEBUG, format!("{:?}", guest::get_addr()).as_str());
+    guest::send_log(guest::DEBUG, format!("{:?}", conf).as_str());
+    return 16 << 32 | 1 as i64;
 }
 
-
-
-
-#[repr(C)]
-#[derive(Deserialize)]
-struct Request {
-    method: String,
-    path: String,
-    headers: Vec<String>,
-    source_addr: String,
-    protocol_version: String,
-}
-
-#[repr(C)]
-struct Response {
-  headers: Vec<String>,
-}
-
-#[no_mangle]
-pub extern fn handle_request() -> i64 {
-  unsafe {
-    let config: i32=  log_enabled(LOG_LEVEL_DEBUG);
-  }
-    // TODO: Implement logging, currently in trouble with i32 memory allocation
-    // log_message(LOG_LEVEL_DEBUG, "DEADBEEF");
-
-    // Example: Add a header and proceed to the next handler
-    // directly and return 0 to skip the next handler.
-
-    // For now, we proceed to the next handler with context
-    16<<32|1
-}
-
-#[no_mangle]
-pub extern fn handle_response(_req_ctx: i32, _is_error: i32) {
-  // log_message(LOG_LEVEL_DEBUG, "DEADBEEF");
-}
-
-pub fn main() {
-    // Retrieve the configuration
-    let config = retrieve_config();
-    if let Some(config_str) = config {
-        log_message(LOG_LEVEL_INFO, &format!("Configuration: {}", config_str));
-    } else {
-        log_message(LOG_LEVEL_ERROR, "Failed to retrieve configuration");
-    }
-}
+#[export_name = "handle_response"]
+fn http_response(_req_ctx: i32, _is_error: i32) {}
