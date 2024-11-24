@@ -9,7 +9,6 @@ wasmPath: forward_auth.wasm
 runtime: wasm
 
 testData:
-  Config:
-    CF_TOKEN: "DEADBEEF"
-    CF_ORG: "ABCDEFG"
-    CF_DOMAIN: "https://{yourdomain}.cloudflareaccess.com"
+  cf_token: "DEADBEEF"
+  cf_org: "ABCDEFG"
+  cf_domain: "https://{yourdomain}.cloudflareaccess.com"
