@@ -27,10 +27,12 @@ lazy_static! {
 #[export_name = "handle_request"]
 pub fn http_request() -> i64 {
     // let conf: &CloudflareConfig = &*CONFIG;
+    // let headers = &guest::get_headers(guest::REQUEST_HEADER);
 
-    let headers = &guest::get_headers(guest::REQUEST_HEADER);
+    let header = "user-agent";
+    let header_values = &guest::get_header_val(guest::REQUEST_HEADER, &header);
 
-    guest::send_log(guest::DEBUG, format!("{:?}", headers).as_str());
+    guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
     return 16 << 32 | 1 as i64;
 }
 

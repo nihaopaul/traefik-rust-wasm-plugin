@@ -10,6 +10,8 @@ pub const DEBUG: i32 = -1;
 
 pub const REQUEST_HEADER: i32 = 0;
 pub const RESPONSE_HEADER: i32 = 1;
+pub const REQUEST_HEADER_TRAILERS: i32 = 2;
+pub const RESPONSE_HEADER_TRAILERS: i32 = 3;
 
 pub const REQUEST_BODY: u32 = 0;
 pub const RESPONSE_BODY: u32 = 1;
@@ -31,11 +33,17 @@ extern "C" {
     fn log(level: i32, message: *const u8, message_len: u32);
     // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
+    // TODO: implement
     fn get_method(buf: *const u8, buf_limit: i32) -> i32;
+    // TODO: implement
     fn set_method(ptr: *const u8, message_len: u32);
+    // TODO: implement
     fn get_uri(ptr: *const u8, message_len: u32) -> i32;
+    // TODO: implement
     fn set_uri(ptr: *const u8, message_len: u32);
+    // TODO: implement
     fn get_protocol_version(ptr: *const u8, message_len: u32) -> i32;
+    // TODO: implement
     fn add_header_value(
         header_kind: u32,
         name_ptr: *const u8,
@@ -43,6 +51,7 @@ extern "C" {
         value_ptr: *const u8,
         value_len: u32,
     );
+    // TODO: implement
     fn set_header_value(
         header_kind: u32,
         name_ptr: *const u8,
@@ -50,22 +59,36 @@ extern "C" {
         value_ptr: *const u8,
         value_len: u32,
     );
+    // TODO: implement
     fn remove_header(header_kind: u32, name_ptr: *const u8, name_len: u32);
 
     // updated get_header_names signature
     fn get_header_names(header_kind: i32, buf: *const i32, buf_limit: i32) -> i64;
+
+    // Done: get a header value
+    // TODO: implement multiple header request
     fn get_header_values(
-        header_kind: u32,
-        name_ptr: *const u8,
-        name_len: u32,
-        buf: *const u8,
+        header_kind: i32,
+        name_ptr: *const i32,
+        name_len: i32,
+        buf: *const i32,
         buf_limit: i32,
     ) -> i64;
+
+    // TODO: implement
     fn log_enabled(level: i32) -> i32;
+
+    // TODO: implement
     fn read_body(body_kind: u32, ptr: *const u8, buf_limit: u32) -> i64;
+
+    // TODO: implement
     fn write_body(body_kind: u32, ptr: *const u8, message_len: u32);
+
+    // TODO: implement
     fn get_status_code() -> i32;
+    // TODO: implement
     fn set_status_code(code: i32);
+    // TODO: implement
     fn enable_features(feature: u32) -> i32;
     // working with get source address
     fn get_source_addr(buf: *const u8, buf_limit: i32) -> i32;
@@ -113,15 +136,42 @@ pub fn log_enabl(level: i32) -> i32 {
     };
 }
 
-pub fn get_header_val(kind: u32, name: &str) -> Vec<String> {
-    let read_buf: [u8; 2048] = [0; 2048];
+// TODO: Implment multiple headers &[&str].
+pub fn get_header_val(kind: i32, header: &str) -> Vec<String> {
+    // ;; get_header_values writes all values of the given name, NUL-terminated, to
+    // ;; memory if the encoded length isn't larger than `buf_limit`. `count_len` is
+    // ;; returned regardless of whether memory was written. The name must be treated
+    // ;; case-insensitive.
+    // ;;
+    // ;; Note: A host who fails to get header values will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "get_header_values" (func $get_header_values
+    //   (param $kind i32)
+    //   (param $name i32) (param  $name_len i32)
+    //   (param  $buf i32) (param $buf_limit i32)
+    //   (result (; count << 32| len ;) i64)))
+
+    let name_ptr = header.as_ptr() as *const i32;
+    let name_len = header.len() as i32;
+
     unsafe {
+        let result = get_header_values(kind, name_ptr, name_len, std::ptr::null(), 0);
+
+        let _count = (result >> 32) as i32;
+        let len = result as i32;
+
+        if len == 0 {
+            return Vec::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
         match get_header_values(
             kind,
-            name.as_ptr(),
-            name.len() as u32,
-            read_buf.as_ptr(),
-            2048,
+            name_ptr,
+            name_len,
+            read_buf.as_ptr() as *const i32,
+            len,
         ) {
             len => {
                 let data: &[u8] = &read_buf[0..len as usize];
@@ -133,7 +183,7 @@ pub fn get_header_val(kind: u32, name: &str) -> Vec<String> {
 
 pub fn get_headers(kind: i32) -> Vec<String> {
     /*
-        ;; get_header_names writes all header names, in lowercase, NUL-terminated, to
+    ;; get_header_names writes all header names, in lowercase, NUL-terminated, to
     ;; memory if the encoded length isn't larger than `buf_limit`. `count_len` is
     ;; returned regardless of whether memory was written.
     ;;
