@@ -34,7 +34,7 @@ extern "C" {
     // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
     // TODO: implement
-    fn get_method(buf: *const u8, buf_limit: i32) -> i32;
+    fn get_method(buf: *const i32, buf_limit: i32) -> i32;
     // TODO: implement
     fn set_method(ptr: *const u8, message_len: u32);
     // TODO: implement
@@ -283,14 +283,26 @@ pub fn get_addr() -> String {
     };
 }
 
-pub fn get_request_method() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+pub fn get_request_method() -> Vec<String> {
+    // (import "http_handler" "get_method" (func $get_method
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
+
     unsafe {
-        match get_method(read_buf.as_ptr(), 2048) {
+        let result = get_method(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return Vec::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_method(read_buf.as_ptr() as *const i32, len) {
             len => {
-                return str::from_utf8(&read_buf[0..len as usize])
-                    .unwrap()
-                    .to_string();
+                let data: &[u8] = &read_buf[0..len as usize];
+                return str_array_from_u8_nul_utf8_unchecked(data);
             }
         }
     };
