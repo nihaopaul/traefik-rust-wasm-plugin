@@ -33,12 +33,12 @@ extern "C" {
     fn log(level: i32, message: *const u8, message_len: u32);
     // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
-    // TODO: implement
+    // working with get_method
     fn get_method(buf: *const i32, buf_limit: i32) -> i32;
     // TODO: implement
     fn set_method(ptr: *const u8, message_len: u32);
-    // TODO: implement
-    fn get_uri(ptr: *const u8, message_len: u32) -> i32;
+    // working with get_uri
+    fn get_uri(ptr: *const i32, message_len: i32) -> i32;
     // TODO: implement
     fn set_uri(ptr: *const u8, message_len: u32);
     // TODO: implement
@@ -283,7 +283,7 @@ pub fn get_addr() -> String {
     };
 }
 
-pub fn get_request_method() -> Vec<String> {
+pub fn get_request_method() -> String {
     // (import "http_handler" "get_method" (func $get_method
     //   (param $buf i32) (param $buf_limit i32)
     //   (result (; len ;) i32)))
@@ -294,17 +294,16 @@ pub fn get_request_method() -> Vec<String> {
         let len = result;
 
         if len == 0 {
-            return Vec::new();
+            return String::new();
         }
 
         let read_buf = vec![0u8; len as usize];
 
-        match get_method(read_buf.as_ptr() as *const i32, len) {
-            response => {
-                return read_buf[0..response as usize]
-                    .split(|&x| x == 0)
-                    .map(|x| str::from_utf8(x).unwrap().to_string())
-                    .collect()
+        match get_method(read_buf.as_ptr() as *const i32, 2048) {
+            len => {
+                return str::from_utf8(&read_buf[0..len as usize])
+                    .unwrap()
+                    .to_string();
             }
         }
     };
@@ -315,9 +314,21 @@ pub fn set_request_method(method: &str) {
 }
 
 pub fn get_request_uri() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_uri" (func $get_uri
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_uri(read_buf.as_ptr(), 2048) {
+        let result = get_uri(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_uri(read_buf.as_ptr() as *const i32, 2048) {
             len => {
                 return str::from_utf8(&read_buf[0..len as usize])
                     .unwrap()
