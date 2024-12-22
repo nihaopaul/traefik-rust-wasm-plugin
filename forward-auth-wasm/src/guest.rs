@@ -300,9 +300,11 @@ pub fn get_request_method() -> Vec<String> {
         let read_buf = vec![0u8; len as usize];
 
         match get_method(read_buf.as_ptr() as *const i32, len) {
-            len => {
-                let data: &[u8] = &read_buf[0..len as usize];
-                return str_array_from_u8_nul_utf8_unchecked(data);
+            response => {
+                return read_buf[0..response as usize]
+                    .split(|&x| x == 0)
+                    .map(|x| str::from_utf8(x).unwrap().to_string())
+                    .collect()
             }
         }
     };
