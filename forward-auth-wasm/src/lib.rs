@@ -33,7 +33,7 @@ pub fn http_request() -> i64 {
     // let header_values = &guest::get_header_val(guest::REQUEST_HEADER, &header);
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
-    let method = &guest::get_addr();
+    let method = &guest::status_code();
     guest::send_log(guest::DEBUG, format!("{:?}", method).as_str());
 
     return 16 << 32 | 1 as i64;

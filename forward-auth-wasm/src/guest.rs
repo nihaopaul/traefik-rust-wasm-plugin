@@ -78,13 +78,13 @@ extern "C" {
     // TODO: implement
     fn log_enabled(level: i32) -> i32;
 
-    // TODO: implement
+    // read_body - work in progress
     fn read_body(body_kind: u32, ptr: *const u8, buf_limit: u32) -> i64;
 
     // TODO: implement
     fn write_body(body_kind: u32, ptr: *const u8, message_len: u32);
 
-    // TODO: implement
+    // get_status_code working
     fn get_status_code() -> i32;
     // TODO: implement
     fn set_status_code(code: i32);
@@ -95,6 +95,9 @@ extern "C" {
 }
 
 pub fn status_code() -> i32 {
+    // (import "http_handler" "get_status_code" (func $get_status_code
+    //   (result (; len ;) i32)))
+    // Note: will panic if called before handle_response!
     unsafe { return get_status_code() };
 }
 
