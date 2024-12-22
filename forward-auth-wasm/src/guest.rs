@@ -33,16 +33,16 @@ extern "C" {
     fn log(level: i32, message: *const u8, message_len: u32);
     // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
-    // TODO: implement
-    fn get_method(buf: *const u8, buf_limit: i32) -> i32;
+    // working with get_method
+    fn get_method(buf: *const i32, buf_limit: i32) -> i32;
     // TODO: implement
     fn set_method(ptr: *const u8, message_len: u32);
-    // TODO: implement
-    fn get_uri(ptr: *const u8, message_len: u32) -> i32;
+    // working with get_uri
+    fn get_uri(ptr: *const i32, message_len: i32) -> i32;
     // TODO: implement
     fn set_uri(ptr: *const u8, message_len: u32);
-    // TODO: implement
-    fn get_protocol_version(ptr: *const u8, message_len: u32) -> i32;
+    // working get_protocol_version
+    fn get_protocol_version(ptr: *const i32, message_len: i32) -> i32;
     // TODO: implement
     fn add_header_value(
         header_kind: u32,
@@ -78,23 +78,26 @@ extern "C" {
     // TODO: implement
     fn log_enabled(level: i32) -> i32;
 
-    // TODO: implement
+    // read_body - work in progress
     fn read_body(body_kind: u32, ptr: *const u8, buf_limit: u32) -> i64;
 
     // TODO: implement
     fn write_body(body_kind: u32, ptr: *const u8, message_len: u32);
 
-    // TODO: implement
+    // get_status_code working
     fn get_status_code() -> i32;
     // TODO: implement
     fn set_status_code(code: i32);
     // TODO: implement
     fn enable_features(feature: u32) -> i32;
     // working with get source address
-    fn get_source_addr(buf: *const u8, buf_limit: i32) -> i32;
+    fn get_source_addr(buf: *const i32, buf_limit: i32) -> i32;
 }
 
 pub fn status_code() -> i32 {
+    // (import "http_handler" "get_status_code" (func $get_status_code
+    //   (result (; len ;) i32)))
+    // Note: will panic if called before handle_response!
     unsafe { return get_status_code() };
 }
 
@@ -271,9 +274,20 @@ pub fn get_conf() -> Vec<u8> {
 }
 
 pub fn get_addr() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_source_addr" (func $get_source_addr
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_source_addr(read_buf.as_ptr(), 2048) {
+        let result = get_source_addr(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+        match get_source_addr(read_buf.as_ptr() as *const i32, len) {
             len => {
                 return str::from_utf8(&read_buf[0..len as usize])
                     .unwrap()
@@ -284,9 +298,22 @@ pub fn get_addr() -> String {
 }
 
 pub fn get_request_method() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_method" (func $get_method
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
+
     unsafe {
-        match get_method(read_buf.as_ptr(), 2048) {
+        let result = get_method(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_method(read_buf.as_ptr() as *const i32, 2048) {
             len => {
                 return str::from_utf8(&read_buf[0..len as usize])
                     .unwrap()
@@ -301,11 +328,23 @@ pub fn set_request_method(method: &str) {
 }
 
 pub fn get_request_uri() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_uri" (func $get_uri
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_uri(read_buf.as_ptr(), 2048) {
-            len => {
-                return str::from_utf8(&read_buf[0..len as usize])
+        let result = get_uri(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_uri(read_buf.as_ptr() as *const i32, len) {
+            response => {
+                return str::from_utf8(&read_buf[0..response as usize])
                     .unwrap()
                     .to_string();
             }
@@ -318,11 +357,23 @@ pub fn set_request_uri(uri: &str) {
 }
 
 pub fn get_request_protocol_version() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_protocol_version" (func $get_protocol_version
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_protocol_version(read_buf.as_ptr(), 2048) {
-            len => {
-                return str::from_utf8(&read_buf[0..len as usize])
+        let result = get_protocol_version(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_protocol_version(read_buf.as_ptr() as *const i32, len) {
+            response => {
+                return str::from_utf8(&read_buf[0..response as usize])
                     .unwrap()
                     .to_string();
             }
