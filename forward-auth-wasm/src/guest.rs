@@ -91,7 +91,7 @@ extern "C" {
     // TODO: implement
     fn enable_features(feature: u32) -> i32;
     // working with get source address
-    fn get_source_addr(buf: *const u8, buf_limit: i32) -> i32;
+    fn get_source_addr(buf: *const i32, buf_limit: i32) -> i32;
 }
 
 pub fn status_code() -> i32 {
@@ -271,9 +271,20 @@ pub fn get_conf() -> Vec<u8> {
 }
 
 pub fn get_addr() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_source_addr" (func $get_source_addr
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_source_addr(read_buf.as_ptr(), 2048) {
+        let result = get_source_addr(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+        match get_source_addr(read_buf.as_ptr() as *const i32, len) {
             len => {
                 return str::from_utf8(&read_buf[0..len as usize])
                     .unwrap()
