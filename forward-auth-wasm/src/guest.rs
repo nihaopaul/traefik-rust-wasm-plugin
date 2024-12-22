@@ -328,7 +328,7 @@ pub fn get_request_uri() -> String {
 
         let read_buf = vec![0u8; len as usize];
 
-        match get_uri(read_buf.as_ptr() as *const i32, 2048) {
+        match get_uri(read_buf.as_ptr() as *const i32, len) {
             len => {
                 return str::from_utf8(&read_buf[0..len as usize])
                     .unwrap()
