@@ -41,8 +41,8 @@ extern "C" {
     fn get_uri(ptr: *const i32, message_len: i32) -> i32;
     // TODO: implement
     fn set_uri(ptr: *const u8, message_len: u32);
-    // TODO: implement
-    fn get_protocol_version(ptr: *const u8, message_len: u32) -> i32;
+    // working get_protocol_version
+    fn get_protocol_version(ptr: *const i32, message_len: i32) -> i32;
     // TODO: implement
     fn add_header_value(
         header_kind: u32,
@@ -329,8 +329,8 @@ pub fn get_request_uri() -> String {
         let read_buf = vec![0u8; len as usize];
 
         match get_uri(read_buf.as_ptr() as *const i32, len) {
-            len => {
-                return str::from_utf8(&read_buf[0..len as usize])
+            response => {
+                return str::from_utf8(&read_buf[0..response as usize])
                     .unwrap()
                     .to_string();
             }
@@ -343,11 +343,23 @@ pub fn set_request_uri(uri: &str) {
 }
 
 pub fn get_request_protocol_version() -> String {
-    let read_buf: [u8; 2048] = [0; 2048];
+    // (import "http_handler" "get_protocol_version" (func $get_protocol_version
+    //   (param $buf i32) (param $buf_limit i32)
+    //   (result (; len ;) i32)))
     unsafe {
-        match get_protocol_version(read_buf.as_ptr(), 2048) {
-            len => {
-                return str::from_utf8(&read_buf[0..len as usize])
+        let result = get_protocol_version(std::ptr::null(), 0);
+
+        let len = result;
+
+        if len == 0 {
+            return String::new();
+        }
+
+        let read_buf = vec![0u8; len as usize];
+
+        match get_protocol_version(read_buf.as_ptr() as *const i32, len) {
+            response => {
+                return str::from_utf8(&read_buf[0..response as usize])
                     .unwrap()
                     .to_string();
             }
