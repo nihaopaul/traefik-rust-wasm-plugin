@@ -43,13 +43,13 @@ extern "C" {
     fn set_uri(ptr: *const u8, message_len: u32);
     // working get_protocol_version
     fn get_protocol_version(ptr: *const i32, message_len: i32) -> i32;
-    // TODO: implement
+    // working add_header_value
     fn add_header_value(
-        header_kind: u32,
-        name_ptr: *const u8,
-        name_len: u32,
-        value_ptr: *const u8,
-        value_len: u32,
+        header_kind: i32,
+        name_ptr: *const i32,
+        name_len: i32,
+        value_ptr: *const i32,
+        value_len: i32,
     );
     // TODO: implement
     fn set_header_value(
@@ -255,14 +255,23 @@ pub fn set_header(kind: u32, name: &str, value: &str) {
     };
 }
 
-pub fn add_header(kind: u32, name: &str, value: &str) {
+pub fn add_header(kind: i32, name: &str, value: &str) {
+    // ;; add_header_value adds a single value for the given header name.
+    // ;;
+    // ;; Note: A host who fails to add the header will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "add_header_value" (func $add_header_value
+    //   (param  $kind i32)
+    //   (param  $name i32) (param $name_len i32)
+    //   (param $value i32) (param $value_len i32)))
+
     unsafe {
         add_header_value(
             kind,
-            name.as_ptr(),
-            name.len() as u32,
-            value.as_ptr(),
-            value.len() as u32,
+            name.as_ptr() as *const i32,
+            name.len() as i32,
+            value.as_ptr() as *const i32,
+            value.len() as i32,
         )
     };
 }
