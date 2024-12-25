@@ -35,13 +35,10 @@ pub fn http_request() -> i64 {
 
     // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
 
-    guest::writebody(guest::RESPONSE_BODY, "<blink>Hello, World!</blink>");
-
     return 16 << 32 | 1 as i64;
 }
 
 #[export_name = "handle_response"]
 fn http_response(_req_ctx: i32, _is_error: i32) {
-
     // guest::send_log(guest::INFO, format!("{:?}", _req_ctx).as_str())
 }

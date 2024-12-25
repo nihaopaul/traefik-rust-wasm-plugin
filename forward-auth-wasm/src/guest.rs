@@ -29,21 +29,13 @@ pub struct CloudflareConfig {
 
 #[link(wasm_import_module = "http_handler")]
 extern "C" {
-    // working with log
     fn log(level: i32, message: *const i32, message_len: i32);
-    // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
-    // working with get_method
     fn get_method(buf: *const i32, buf_limit: i32) -> i32;
-    // working set_method
     fn set_method(ptr: *const i32, message_len: i32);
-    // working with get_uri
     fn get_uri(ptr: *const i32, message_len: i32) -> i32;
-    // working set_uri
     fn set_uri(ptr: *const i32, message_len: i32);
-    // working get_protocol_version
     fn get_protocol_version(ptr: *const i32, message_len: i32) -> i32;
-    // working add_header_value
     fn add_header_value(
         header_kind: i32,
         name_ptr: *const i32,
@@ -51,7 +43,6 @@ extern "C" {
         value_ptr: *const i32,
         value_len: i32,
     );
-    // working set_header_value
     fn set_header_value(
         header_kind: i32,
         name_ptr: *const i32,
@@ -59,13 +50,8 @@ extern "C" {
         value_ptr: *const i32,
         value_len: i32,
     );
-    // working remove_header
     fn remove_header(header_kind: i32, name_ptr: *const i32, name_len: i32);
-
-    // updated get_header_names signature
     fn get_header_names(header_kind: i32, buf: *const i32, buf_limit: i32) -> i64;
-
-    // Done: get a header value
     // TODO: implement multiple header request
     fn get_header_values(
         header_kind: i32,
@@ -74,23 +60,12 @@ extern "C" {
         buf: *const i32,
         buf_limit: i32,
     ) -> i64;
-
-    // log_enabled working
     fn log_enabled(level: i32) -> i32;
-
-    // read_body working
     fn read_body(body_kind: i32, ptr: *const i32, buf_limit: i32) -> i64;
-
-    // write_body working
     fn write_body(body_kind: i32, ptr: *const i32, message_len: i32);
-
-    // get_status_code working
     fn get_status_code() -> i32;
-    // set_status_code working
     fn set_status_code(code: i32);
-    // working with enable_features
     fn enable_features(feature: i32) -> i32;
-    // working with get source address
     fn get_source_addr(buf: *const i32, buf_limit: i32) -> i32;
 }
 
