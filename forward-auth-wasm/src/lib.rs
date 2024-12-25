@@ -1,4 +1,4 @@
-use guest::CloudflareConfig;
+use guest::{CloudflareConfig, REQUEST_BODY, RESPONSE_BODY};
 use lazy_static::lazy_static;
 mod guest;
 
@@ -33,8 +33,8 @@ pub fn http_request() -> i64 {
     // let header_values = &guest::get_header_val(guest::REQUEST_HEADER, &header);
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
-    let method = &guest::status_code();
-    guest::send_log(guest::DEBUG, format!("{:?}", method).as_str());
+    let data = &guest::readbody(REQUEST_BODY);
+    guest::send_log(guest::INFO, format!("{:?}", data).as_str());
 
     return 16 << 32 | 1 as i64;
 }
