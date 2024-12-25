@@ -3,6 +3,12 @@ name = "forward_auth_plugin"
 version = "0.1.0"
 authors = ["Paul Adams <nihaopaul@gmail.com>"]
 edition = "2018"
+target = "wasm32-unknown-unknown"
+include = [
+    "src/lib.rs",
+    "Cargo.toml",
+]
+
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -19,3 +25,5 @@ serde_json = "1.0.132"
 [profile.release]
 # Tell `rustc` to optimize for small code size.
 opt-level = "s"
+
+

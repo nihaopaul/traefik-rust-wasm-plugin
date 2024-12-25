@@ -37,4 +37,4 @@ debug:
 
 
 cargo:
-	cargo publish --dry-run
+	cargo publish --target wasm32-unknown-unknown --dry-run --allow-dirty
