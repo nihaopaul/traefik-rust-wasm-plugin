@@ -33,14 +33,13 @@ pub fn http_request() -> i64 {
     // let header_values = &guest::get_header_val(guest::REQUEST_HEADER, &header);
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
-    // let data = &guest::readbody(REQUEST_BODY);
-    let features = &guest::enable_feature(guest::FEATURE_BUFFER_REQUEST);
-    guest::send_log(guest::WARN, format!("{:?}", features).as_str());
-
+    // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
+    guest::rem_header(guest::REQUEST_HEADER, "cookie");
     return 16 << 32 | 1 as i64;
 }
 
 #[export_name = "handle_response"]
 fn http_response(_req_ctx: i32, _is_error: i32) {
-    guest::send_log(guest::INFO, format!("{:?}", _req_ctx).as_str())
+
+    // guest::send_log(guest::INFO, format!("{:?}", _req_ctx).as_str())
 }
