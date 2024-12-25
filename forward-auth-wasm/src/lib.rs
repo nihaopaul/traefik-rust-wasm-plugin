@@ -33,8 +33,9 @@ pub fn http_request() -> i64 {
     // let header_values = &guest::get_header_val(guest::REQUEST_HEADER, &header);
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
-    let data = &guest::readbody(REQUEST_BODY);
-    guest::send_log(guest::INFO, format!("{:?}", data).as_str());
+    // let data = &guest::readbody(REQUEST_BODY);
+    let features = &guest::enable_feature(guest::FEATURE_BUFFER_REQUEST);
+    guest::send_log(guest::WARN, format!("{:?}", features).as_str());
 
     return 16 << 32 | 1 as i64;
 }
