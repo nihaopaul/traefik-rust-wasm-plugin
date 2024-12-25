@@ -34,7 +34,7 @@ pub fn http_request() -> i64 {
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
     // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
-    guest::add_header(guest::RESPONSE_HEADER, "X-DEAD-BEEF", "Bearer 123456789");
+    guest::rem_header(guest::REQUEST_HEADER, "cookie");
     return 16 << 32 | 1 as i64;
 }
 

@@ -51,16 +51,16 @@ extern "C" {
         value_ptr: *const i32,
         value_len: i32,
     );
-    // TODO: implement
+    // working set_header_value
     fn set_header_value(
-        header_kind: u32,
-        name_ptr: *const u8,
-        name_len: u32,
-        value_ptr: *const u8,
-        value_len: u32,
+        header_kind: i32,
+        name_ptr: *const i32,
+        name_len: i32,
+        value_ptr: *const i32,
+        value_len: i32,
     );
-    // TODO: implement
-    fn remove_header(header_kind: u32, name_ptr: *const u8, name_len: u32);
+    // working remove_header
+    fn remove_header(header_kind: i32, name_ptr: *const i32, name_len: i32);
 
     // updated get_header_names signature
     fn get_header_names(header_kind: i32, buf: *const i32, buf_limit: i32) -> i64;
@@ -239,18 +239,35 @@ pub fn get_headers(kind: i32) -> Vec<String> {
     };
 }
 
-pub fn rem_header(kind: u32, name: &str) {
-    unsafe { remove_header(kind, name.as_ptr(), name.len() as u32) };
+pub fn rem_header(kind: i32, name: &str) {
+    // ;; remove_header removes all values for a header with the given name.
+    // ;;
+    // ;; Note: A host who fails to remove the header will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "remove_header" (func $set_header_value
+    //   (param  $kind i32)
+    //   (param  $name i32) (param $name_len i32)))
+
+    unsafe { remove_header(kind, name.as_ptr() as *const i32, name.len() as i32) };
 }
 
-pub fn set_header(kind: u32, name: &str, value: &str) {
+pub fn set_header(kind: i32, name: &str, value: &str) {
+    // ;; set_header_value overwrites all values of the given header name with the
+    // ;; input.
+    // ;;
+    // ;; Note: A host who fails to set the header will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "set_header_value" (func $set_header_value
+    //   (param  $kind i32)
+    //   (param  $name i32) (param $name_len i32)
+    //   (param $value i32) (param $value_len i32)))
     unsafe {
         set_header_value(
             kind,
-            name.as_ptr(),
-            name.len() as u32,
-            value.as_ptr(),
-            value.len() as u32,
+            name.as_ptr() as *const i32,
+            name.len() as i32,
+            value.as_ptr() as *const i32,
+            value.len() as i32,
         )
     };
 }
