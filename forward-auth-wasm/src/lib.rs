@@ -35,7 +35,7 @@ pub fn http_request() -> i64 {
 
     // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
 
-    guest::set_code(404);
+    guest::writebody(guest::RESPONSE_BODY, "<blink>Hello, World!</blink>");
 
     return 16 << 32 | 1 as i64;
 }
