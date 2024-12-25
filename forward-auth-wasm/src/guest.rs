@@ -35,12 +35,12 @@ extern "C" {
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
     // working with get_method
     fn get_method(buf: *const i32, buf_limit: i32) -> i32;
-    // TODO: implement
-    fn set_method(ptr: *const u8, message_len: u32);
+    // working set_method
+    fn set_method(ptr: *const i32, message_len: i32);
     // working with get_uri
     fn get_uri(ptr: *const i32, message_len: i32) -> i32;
-    // TODO: implement
-    fn set_uri(ptr: *const u8, message_len: u32);
+    // working set_uri
+    fn set_uri(ptr: *const i32, message_len: i32);
     // working get_protocol_version
     fn get_protocol_version(ptr: *const i32, message_len: i32) -> i32;
     // working add_header_value
@@ -371,7 +371,13 @@ pub fn get_request_method() -> String {
 }
 
 pub fn set_request_method(method: &str) {
-    unsafe { set_method(method.as_ptr(), method.len() as u32) };
+    // ;; set_method overwrites the method with one read from memory, e.g. "POST".
+    // ;;
+    // ;; Note: A host who fails to set the method will trap (aka panic, "unreachable"
+    // ;; instruction).
+    // (import "http_handler" "set_method" (func $set_method
+    //   (param $method i32) (param $method_len i32)))
+    unsafe { set_method(method.as_ptr() as *const i32, method.len() as i32) };
 }
 
 pub fn get_request_uri() -> String {
@@ -400,7 +406,18 @@ pub fn get_request_uri() -> String {
 }
 
 pub fn set_request_uri(uri: &str) {
-    unsafe { set_uri(uri.as_ptr(), uri.len() as u32) };
+    // ;; set_uri overwrites the URI with one read from memory, e.g.
+    // ;; "/v1.0/hi?name=panda".
+    // ;;
+    // ;; Note: The URI may include query parameters. The guest MUST pass
+    // ;; the URI encoded as the host will ALWAYS expect the URI as encoded
+    // ;; and passing it unencoded could lead to unexpected behaviours.
+    // ;;
+    // ;; Note: A host who fails to set the URI will trap (aka panic, "unreachable"
+    // ;; instruction).
+    // (import "http_handler" "set_uri" (func $set_uri
+    //   (param $uri i32) (param $uri_len i32)))
+    unsafe { set_uri(uri.as_ptr() as *const i32, uri.len() as i32) };
 }
 
 pub fn get_request_protocol_version() -> String {
