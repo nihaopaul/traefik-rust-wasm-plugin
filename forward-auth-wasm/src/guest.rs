@@ -30,7 +30,7 @@ pub struct CloudflareConfig {
 #[link(wasm_import_module = "http_handler")]
 extern "C" {
     // working with log
-    fn log(level: i32, message: *const u8, message_len: u32);
+    fn log(level: i32, message: *const i32, message_len: i32);
     // working with get_config
     fn get_config(buf: *const i32, buf_limit: i32) -> i32;
     // working with get_method
@@ -75,7 +75,7 @@ extern "C" {
         buf_limit: i32,
     ) -> i64;
 
-    // TODO: implement
+    // log_enabled working
     fn log_enabled(level: i32) -> i32;
 
     // read_body working
@@ -145,6 +145,15 @@ pub fn readbody(kind: i32) -> Vec<u8> {
 }
 
 pub fn set_code(code: i32) {
+    // ;; set_status_code overwrites the status code produced by the next handler defined
+    // ;; on the host, e.g. 200. To call this in `handle_response` requires
+    // ;;`feature_buffer_response`.
+    // ;;
+    // ;; Note: A host who fails to set the status code will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "set_status_code" (func $set_status_code
+    //   (param $status_code i32)))
+
     unsafe { set_status_code(code) };
 }
 
@@ -152,7 +161,12 @@ pub fn writebody(kind: u32, message: &str) {
     unsafe { write_body(kind, message.as_ptr(), message.len() as u32) };
 }
 
-pub fn log_enabl(level: i32) -> i32 {
+pub fn is_log_enabled(level: i32) -> i32 {
+    // ;; log_enabled returns 1 if the $level is enabled. This value may be cached
+    // ;; at request granularity.
+    // (import "http_handler" "log_enabled" (func $log_enabled
+    //   (param $level i32)
+    //   (result (; 0 or enabled(1) ;) i32)))
     unsafe {
         match log_enabled(level) {
             res => return res,
@@ -294,7 +308,15 @@ pub fn add_header(kind: i32, name: &str, value: &str) {
 }
 
 pub fn send_log(level: i32, message: &str) {
-    unsafe { log(level, message.as_ptr(), message.len() as u32) };
+    // ;; log adds a UTF-8 encoded message to the host's logs at the given $level.
+    // ;;
+    // ;; Note: A host who fails to log a message should ignore it instead of a trap
+    // ;; (aka panic, "unreachable" instruction).
+    // (import "http_handler" "log" (func $log
+    //   (param $level (; log_level ;) i32)
+    //   (param $message i32) (param $message_len i32)))
+
+    unsafe { log(level, message.as_ptr() as *const i32, message.len() as i32) };
 }
 
 pub fn get_conf() -> Vec<u8> {

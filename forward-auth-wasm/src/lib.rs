@@ -34,7 +34,9 @@ pub fn http_request() -> i64 {
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
     // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
-    guest::set_request_method("POST");
+
+    guest::set_code(404);
+
     return 16 << 32 | 1 as i64;
 }
 
