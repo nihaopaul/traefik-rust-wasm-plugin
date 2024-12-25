@@ -1,6 +1,6 @@
 // reference code from https://github.com/elisasre/http-wasm-rust/blob/main/src/guest.rs
 use serde::{Deserialize, Serialize};
-use std::{convert::TryInto, str, usize::MAX, vec};
+use std::{str, vec};
 
 pub const FATAL: i32 = 3;
 pub const ERROR: i32 = 2;
