@@ -34,20 +34,8 @@ pub fn http_request() -> i64 {
     // guest::send_log(guest::DEBUG, format!("{:?}", header_values).as_str());
 
     // guest::send_log(guest::WARN, format!("{:?}", features).as_str());
-    let debug = guest::is_log_enabled(guest::DEBUG);
-    let info = guest::is_log_enabled(guest::INFO);
-    let warn = guest::is_log_enabled(guest::WARN);
-    let fatal = guest::is_log_enabled(guest::FATAL);
-    let error = guest::is_log_enabled(guest::ERROR);
 
-    guest::send_log(
-        guest::DEBUG,
-        format!(
-            "Debug: {} Info: {} Warn: {} Fatal: {}, Error: {}",
-            debug, info, warn, fatal, error
-        )
-        .as_str(),
-    );
+    guest::set_code(404);
 
     return 16 << 32 | 1 as i64;
 }

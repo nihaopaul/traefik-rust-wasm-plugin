@@ -145,6 +145,15 @@ pub fn readbody(kind: i32) -> Vec<u8> {
 }
 
 pub fn set_code(code: i32) {
+    // ;; set_status_code overwrites the status code produced by the next handler defined
+    // ;; on the host, e.g. 200. To call this in `handle_response` requires
+    // ;;`feature_buffer_response`.
+    // ;;
+    // ;; Note: A host who fails to set the status code will trap (aka panic,
+    // ;; "unreachable" instruction).
+    // (import "http_handler" "set_status_code" (func $set_status_code
+    //   (param $status_code i32)))
+
     unsafe { set_status_code(code) };
 }
 
