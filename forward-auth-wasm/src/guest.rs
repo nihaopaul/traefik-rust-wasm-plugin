@@ -16,9 +16,9 @@ pub const RESPONSE_HEADER_TRAILERS: i32 = 3;
 pub const REQUEST_BODY: i32 = 0;
 pub const RESPONSE_BODY: i32 = 1;
 
-pub const FEATURE_BUFFER_REQUEST: u32 = 1;
-pub const FEATURE_BUFFER_RESPONSE: u32 = 2;
-pub const FEATURE_TRAILERS: u32 = 3;
+pub const FEATURE_BUFFER_REQUEST: i32 = 1;
+pub const FEATURE_BUFFER_RESPONSE: i32 = 2;
+pub const FEATURE_TRAILERS: i32 = 4;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CloudflareConfig {
@@ -78,7 +78,7 @@ extern "C" {
     // TODO: implement
     fn log_enabled(level: i32) -> i32;
 
-    // read_body - work in progress
+    // read_body working
     fn read_body(body_kind: i32, ptr: *const i32, buf_limit: i32) -> i64;
 
     // TODO: implement
@@ -88,8 +88,8 @@ extern "C" {
     fn get_status_code() -> i32;
     // TODO: implement
     fn set_status_code(code: i32);
-    // TODO: implement
-    fn enable_features(feature: u32) -> i32;
+    // working with enable_features
+    fn enable_features(feature: i32) -> i32;
     // working with get source address
     fn get_source_addr(buf: *const i32, buf_limit: i32) -> i32;
 }
@@ -101,7 +101,12 @@ pub fn status_code() -> i32 {
     unsafe { return get_status_code() };
 }
 
-pub fn enable_feature(feature: u32) -> i32 {
+pub fn enable_feature(feature: i32) -> i32 {
+    // ;; enable_features tries to enable the given features and returns the entire
+    // ;; feature bitflag supported by the host.
+    // (import "http_handler" "enable_features" (func $enable_features
+    //   (param $enable_features i32)
+    //   (result  (; features ;) i32)))
     unsafe {
         match enable_features(feature) {
             res => {
