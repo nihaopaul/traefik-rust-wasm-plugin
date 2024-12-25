@@ -81,12 +81,12 @@ extern "C" {
     // read_body working
     fn read_body(body_kind: i32, ptr: *const i32, buf_limit: i32) -> i64;
 
-    // TODO: implement
-    fn write_body(body_kind: u32, ptr: *const u8, message_len: u32);
+    // write_body working
+    fn write_body(body_kind: i32, ptr: *const i32, message_len: i32);
 
     // get_status_code working
     fn get_status_code() -> i32;
-    // TODO: implement
+    // set_status_code working
     fn set_status_code(code: i32);
     // working with enable_features
     fn enable_features(feature: i32) -> i32;
@@ -95,9 +95,13 @@ extern "C" {
 }
 
 pub fn status_code() -> i32 {
+    // ;; get_status_code returns the status code produced by the next handler defined
+    // ;; on the host, e.g. 200.
+    // ;;
+    // ;; Note: A host who fails to get the status code will trap (aka panic,
+    // ;; "unreachable" instruction).
     // (import "http_handler" "get_status_code" (func $get_status_code
     //   (result (; len ;) i32)))
-    // Note: will panic if called before handle_response!
     unsafe { return get_status_code() };
 }
 
@@ -157,8 +161,8 @@ pub fn set_code(code: i32) {
     unsafe { set_status_code(code) };
 }
 
-pub fn writebody(kind: u32, message: &str) {
-    unsafe { write_body(kind, message.as_ptr(), message.len() as u32) };
+pub fn writebody(kind: i32, message: &str) {
+    unsafe { write_body(kind, message.as_ptr() as *const i32, message.len() as i32) };
 }
 
 pub fn is_log_enabled(level: i32) -> i32 {
