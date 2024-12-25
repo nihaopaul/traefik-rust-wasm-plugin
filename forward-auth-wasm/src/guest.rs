@@ -1,6 +1,6 @@
 // reference code from https://github.com/elisasre/http-wasm-rust/blob/main/src/guest.rs
 use serde::{Deserialize, Serialize};
-use std::str;
+use std::{str, vec};
 
 pub const FATAL: i32 = 3;
 pub const ERROR: i32 = 2;
@@ -13,8 +13,8 @@ pub const RESPONSE_HEADER: i32 = 1;
 pub const REQUEST_HEADER_TRAILERS: i32 = 2;
 pub const RESPONSE_HEADER_TRAILERS: i32 = 3;
 
-pub const REQUEST_BODY: u32 = 0;
-pub const RESPONSE_BODY: u32 = 1;
+pub const REQUEST_BODY: i32 = 0;
+pub const RESPONSE_BODY: i32 = 1;
 
 pub const FEATURE_BUFFER_REQUEST: u32 = 1;
 pub const FEATURE_BUFFER_RESPONSE: u32 = 2;
@@ -79,7 +79,7 @@ extern "C" {
     fn log_enabled(level: i32) -> i32;
 
     // read_body - work in progress
-    fn read_body(body_kind: u32, ptr: *const u8, buf_limit: u32) -> i64;
+    fn read_body(body_kind: i32, ptr: *const i32, buf_limit: i32) -> i64;
 
     // TODO: implement
     fn write_body(body_kind: u32, ptr: *const u8, message_len: u32);
@@ -111,15 +111,31 @@ pub fn enable_feature(feature: u32) -> i32 {
     };
 }
 
-pub fn readbody(kind: u32) -> Vec<u8> {
-    let read_buf: [u8; 2048] = [0; 2048];
+pub fn readbody(kind: i32) -> Vec<u8> {
+    // (import "http_handler" "read_body" (func $read_body
+    //   (param $kind i32)
+    //   (param  $buf i32) (param $buf_len i32)
+    //   (result (; 0 or EOF(1) << 32 | len ;) i64)))
+    let max_buffer_size = 1024 * 1024; // 1 MB buffer
+    let read_buf = vec![0; max_buffer_size];
+
     unsafe {
-        match read_body(kind, read_buf.as_ptr(), 2048) {
-            // TODO: how to define the limit?
-            len => {
-                return read_buf[0..len as usize].to_vec();
-            }
+        let mut eof = 1;
+        let mut full_body = Vec::new();
+
+        while eof != 0 {
+            let response = read_body(
+                kind,
+                read_buf.as_ptr() as *const i32,
+                max_buffer_size as i32,
+            );
+            eof = (response << 32) as i32;
+            let len = response as i32;
+
+            full_body.extend_from_slice(&read_buf[..len as usize]);
         }
+
+        return full_body;
     };
 }
 
