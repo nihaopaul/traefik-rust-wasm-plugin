@@ -3,14 +3,12 @@ prog :=traefik-auth
 build: 
 	make release_cleanup
 	cargo build --target wasm32-unknown-unknown
-	# cargo build --target wasm32-wasi --release
 	cp .traefik.yml pkg/
 	cp target/wasm32-unknown-unknown/debug/forward_auth_plugin.wasm pkg/$(prog).wasm
 
 release:
 	make release-cleanup
 	cargo build --target wasm32-unknown-unknown --release
-	# cargo build --target wasm32-wasi --release
 	cp .traefik.yml pkg/
 	cp target/wasm32-unknown-unknown/release/forward_auth_plugin.wasm pkg/$(prog).wasm
 
@@ -36,3 +34,7 @@ http:
 debug:
 	make build
 	wasm2wat pkg/traefik-auth.wasm | less
+
+
+cargo:
+	cargo publish --dry-run

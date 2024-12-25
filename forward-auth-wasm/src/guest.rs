@@ -1,5 +1,10 @@
-// reference code from https://github.com/elisasre/http-wasm-rust/blob/main/src/guest.rs
-use serde::{Deserialize, Serialize};
+#![allow(dead_code)]
+
+//
+// Initial reference code from:  https://github.com/elisasre/http-wasm-rust/
+// Updated to match the implementation ABI: https://http-wasm.io/http-handler-abi/
+//
+
 use std::{str, vec};
 
 pub const FATAL: i32 = 3;
@@ -19,13 +24,6 @@ pub const RESPONSE_BODY: i32 = 1;
 pub const FEATURE_BUFFER_REQUEST: i32 = 1;
 pub const FEATURE_BUFFER_RESPONSE: i32 = 2;
 pub const FEATURE_TRAILERS: i32 = 4;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CloudflareConfig {
-    pub cf_domain: String,
-    pub cf_org: String,
-    pub cf_token: String,
-}
 
 #[link(wasm_import_module = "http_handler")]
 extern "C" {
@@ -137,6 +135,17 @@ pub fn set_code(code: i32) {
 }
 
 pub fn writebody(kind: i32, message: &str) {
+    // ;; write_body reads `body_len` bytes at memory offset `body` and writes them to
+    // ;; the pending body.
+    // ;;
+    // ;; Unlike `set_XXX` functions, this function is stateful, so repeated calls
+    // ;; write to the current stream.
+    // ;;
+    // ;; Note: A host who fails to write the body will trap (aka panic, "unreachable"
+    // ;; instruction).
+    // (import "http_handler" "write_body" (func $write_body
+    //   (param $kind i32)
+    //   (param $body i32) (param $body_len i32)))
     unsafe { write_body(kind, message.as_ptr() as *const i32, message.len() as i32) };
 }
 
@@ -221,7 +230,7 @@ pub fn get_headers(kind: i32) -> Vec<String> {
             return Vec::new();
         }
 
-        let read_buf = vec![0u8; len as usize];
+        let read_buf: Vec<u8> = vec![0u8; len as usize];
 
         match get_header_names(kind, read_buf.as_ptr() as *const i32, len) {
             len => {
