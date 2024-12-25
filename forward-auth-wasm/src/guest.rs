@@ -117,8 +117,8 @@ pub fn readbody(kind: i32) -> Vec<u8> {
     //   (param  $buf i32) (param $buf_len i32)
     //   (result (; 0 or EOF(1) << 32 | len ;) i64)))
     let max_buffer_size = 1024 * 1024; // 1 MB buffer
-                                       // let max_buffer_size: usize = usize::MAX;
     let read_buf = vec![0; max_buffer_size];
+
     unsafe {
         let mut eof = 1;
         let mut full_body = Vec::new();
@@ -135,7 +135,7 @@ pub fn readbody(kind: i32) -> Vec<u8> {
             full_body.extend_from_slice(&read_buf[..len as usize]);
         }
 
-        return full_body.to_vec();
+        return full_body;
     };
 }
 
