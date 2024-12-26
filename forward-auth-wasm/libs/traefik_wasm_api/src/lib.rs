@@ -1,10 +1,5 @@
 #![allow(dead_code)]
 
-//
-// Initial reference code from:  https://github.com/elisasre/http-wasm-rust/
-// Updated to match the implementation ABI: https://http-wasm.io/http-handler-abi/
-//
-
 use std::{str, vec};
 
 pub const FATAL: i32 = 3;

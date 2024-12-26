@@ -37,4 +37,4 @@ debug:
 
 
 cargo:
-	cargo publish --manifest-path libs/traefik_wasm_api/Cargo.toml --target wasm32-unknown-unknown --dry-run --allow-dirty
+	cargo publish --manifest-path libs/traefik_wasm_api/Cargo.toml --target wasm32-unknown-unknown  
