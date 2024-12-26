@@ -1,6 +1,6 @@
 [package]
 name = "traefik_wasm_api"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Paul Adams <nihaopaul@gmail.com>"]
 edition = "2018"
 target = "wasm32-unknown-unknown"
