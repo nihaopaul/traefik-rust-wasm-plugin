@@ -4,13 +4,13 @@ build:
 	make release_cleanup
 	cargo build --target wasm32-unknown-unknown
 	cp .traefik.yml pkg/
-	cp target/wasm32-unknown-unknown/debug/forward_auth_plugin.wasm pkg/$(prog).wasm
+	cp target/wasm32-unknown-unknown/debug/traefik-example.wasm pkg/$(prog).wasm
 
 release:
-	make release-cleanup
+	make release_cleanup
 	cargo build --target wasm32-unknown-unknown --release
 	cp .traefik.yml pkg/
-	cp target/wasm32-unknown-unknown/release/forward_auth_plugin.wasm pkg/$(prog).wasm
+	cp target/wasm32-unknown-unknown/release/traefik-example.wasm pkg/$(prog).wasm
 
 release_cleanup:
 	rm -rf pkg/

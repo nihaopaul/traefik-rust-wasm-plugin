@@ -1,5 +1,5 @@
 [package]
-name = "traefik-example"
+name = "traefik_wasm_api"
 version = "1.0.0"
 authors = ["Paul Adams <nihaopaul@gmail.com>"]
 edition = "2018"
@@ -7,22 +7,18 @@ target = "wasm32-unknown-unknown"
 repository = "https://github.com/nihaopaul/traefik-rust-wasm-plugin"
 description = "wasm interface for traefik"
 include = [
-    "libraries/traefik-wasm-api/*"
+    "lib.rs",
+    "Cargo.toml",
 ]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path = "libs/traefik_wasm_api/src/lib.rs"
+path="src/lib.rs"
 
 [features]
 default = []
 
 [dependencies]
-lazy_static = "1.5.0"
-serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.132"
-traefik_wasm_api = { path = "libs/traefik_wasm_api" }
-
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.

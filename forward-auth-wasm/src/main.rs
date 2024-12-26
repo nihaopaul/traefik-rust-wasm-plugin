@@ -8,14 +8,17 @@ pub struct CloudflareConfig {
     pub cf_token: String,
 }
 
-mod lib;
+use traefik_wasm_api;
 
 // Returns the Structured Configuration from the host in JSON format
 lazy_static! {
     static ref CONFIG: CloudflareConfig = {
-        match serde_json::from_slice(&lib::get_conf()) {
+        match serde_json::from_slice(&traefik_wasm_api::get_conf()) {
             Ok(config) => {
-                lib::send_log(lib::DEBUG, format!("{:?}", config).as_str());
+                traefik_wasm_api::send_log(
+                    traefik_wasm_api::DEBUG,
+                    format!("{:?}", config).as_str(),
+                );
                 config
             }
             Err(e) => {
@@ -24,8 +27,11 @@ lazy_static! {
                     cf_org: "NO_ORG_DEFINED".to_string(),
                     cf_token: "NO_TOKEN_DEFINED".to_string(),
                 };
-                lib::send_log(lib::WARN, format!("{:?}", e).as_str());
-                lib::send_log(lib::WARN, format!("{:?}", empty_config).as_str());
+                traefik_wasm_api::send_log(traefik_wasm_api::WARN, format!("{:?}", e).as_str());
+                traefik_wasm_api::send_log(
+                    traefik_wasm_api::WARN,
+                    format!("{:?}", empty_config).as_str(),
+                );
                 empty_config
             }
         }
@@ -35,19 +41,19 @@ lazy_static! {
 #[export_name = "handle_request"]
 pub fn http_request() -> i64 {
     // let conf: &CloudflareConfig = &*CONFIG;
-    // let headers = &lib::get_headers(lib::REQUEST_HEADER);
+    // let headers = &traefik_wasm_api::get_headers(traefik_wasm_api::REQUEST_HEADER);
 
     // let header = "user-agent";
-    // let header_values = &lib::get_header_val(lib::REQUEST_HEADER, &header);
-    // lib::send_log(lib::DEBUG, format!("{:?}", header_values).as_str());
+    // let header_values = &traefik_wasm_api::get_header_val(traefik_wasm_api::REQUEST_HEADER, &header);
+    // traefik_wasm_api::send_log(traefik_wasm_api::DEBUG, format!("{:?}", header_values).as_str());
 
-    // lib::send_log(lib::WARN, format!("{:?}", features).as_str());
-    let items = lib::get_headers(lib::REQUEST_HEADER);
+    // traefik_wasm_api::send_log(traefik_wasm_api::WARN, format!("{:?}", features).as_str());
+    let items = traefik_wasm_api::get_headers(traefik_wasm_api::REQUEST_HEADER);
 
     for s in items {
         // each String is moved into s here...
-        lib::get_header_val(lib::REQUEST_HEADER, s.as_str());
-        lib::send_log(lib::DEBUG, format!("{:?}", s).as_str());
+        traefik_wasm_api::get_header_val(traefik_wasm_api::REQUEST_HEADER, s.as_str());
+        traefik_wasm_api::send_log(traefik_wasm_api::DEBUG, format!("{:?}", s).as_str());
     } // ...an
 
     return 16 << 32 | 1 as i64;
@@ -55,7 +61,7 @@ pub fn http_request() -> i64 {
 
 #[export_name = "handle_response"]
 fn http_response(_req_ctx: i32, _is_error: i32) {
-    lib::send_log(lib::INFO, format!("{:?}", _req_ctx).as_str())
+    traefik_wasm_api::send_log(traefik_wasm_api::INFO, format!("{:?}", _req_ctx).as_str())
 }
 
 fn main() {}
