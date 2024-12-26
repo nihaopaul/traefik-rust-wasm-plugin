@@ -1,14 +1,15 @@
 [package]
 name = "traefik-example"
-version = "1.0.0"
 authors = ["Paul Adams <nihaopaul@gmail.com>"]
+version = "1.0.0"
 edition = "2018"
 target = "wasm32-unknown-unknown"
 repository = "https://github.com/nihaopaul/traefik-rust-wasm-plugin"
-description = "wasm interface for traefik"
+description = "example interface for traefik"
 include = [
-    "libraries/traefik-wasm-api/*"
+    "libs/traefik_wasm_api/*"
 ]
+publish = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]

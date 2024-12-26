@@ -6,14 +6,11 @@ edition = "2018"
 target = "wasm32-unknown-unknown"
 repository = "https://github.com/nihaopaul/traefik-rust-wasm-plugin"
 description = "wasm interface for traefik"
-include = [
-    "lib.rs",
-    "Cargo.toml",
-]
+publish = true
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path="src/lib.rs"
 
 [features]
 default = []

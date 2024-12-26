@@ -4,3 +4,4 @@ Cargo.lock
 bin/
 pkg/
 wasm-pack.log
+libs/traefik_wasm_api/target/
